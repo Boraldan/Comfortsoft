@@ -5,12 +5,16 @@ import boraldan.findmax.cosysoft.controller.exception.FileProcessingException;
 import boraldan.findmax.cosysoft.controller.exception.InvalidParameterException;
 import boraldan.findmax.cosysoft.service.MaxService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.ErrorResponse;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -40,16 +44,7 @@ public class MaxController {
         maxService.findMax(N, filePath)
                 .thenApply(deferredResult::setResult)
                 .exceptionally(ex -> {
-                    Throwable cause = ex.getCause();
-                    if (cause instanceof FileProcessingException) {
-                        deferredResult.setErrorResult(ResponseEntity.status(HttpStatus.BAD_REQUEST).body(cause.getMessage()));
-                    } else if (cause instanceof InvalidParameterException) {
-                        deferredResult.setErrorResult(ResponseEntity.status(HttpStatus.BAD_REQUEST).body(cause.getMessage()));
-                    } else if (cause instanceof MyDataProcessingException) {
-                        deferredResult.setErrorResult(ResponseEntity.status(HttpStatus.NO_CONTENT).body(cause.getMessage()));
-                    } else {
-                        deferredResult.setErrorResult(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(cause.getMessage()));
-                    }
+                    deferredResult.setErrorResult(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ex.getMessage()));
                     return null;
                 });
 

@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import java.io.File;
 import java.io.FileInputStream;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.OptionalLong;
 import java.util.concurrent.CompletableFuture;
@@ -41,8 +42,8 @@ public class MaxService {
                 throw new InvalidParameterException("Число N должно быть больше 0.");
             }
 
-            long[] longMass = uploadExcel(N, file);
-            if ( longMass.length < N) {
+            List<Long> longMass = uploadExcel(N, file);
+            if ( longMass.size() < N) {
                 throw new MyDataProcessingException("Недостаточно чисел в файле для поиска максимального.");
             }
 
@@ -56,9 +57,9 @@ public class MaxService {
      *
      * @param N количество чисел участвующих в выборке
      * @param file файл с набором чисел
-     * @return массив с числами типа long
+     * @return List с числами типа long
      */
-    private long[] uploadExcel(Long N, File file) {
+    private List<Long> uploadExcel(Long N, File file) {
         List<Long> numbers = new ArrayList<>();
 
         try (FileInputStream fis = new FileInputStream(file);
@@ -78,24 +79,18 @@ public class MaxService {
             throw new RuntimeException("Ошибка при обработке файла", e);
         }
 
-        return numbers.stream().mapToLong(Long::longValue).toArray();
+        return numbers;
     }
 
     /**
-     * Находит максимальное значение в массиве чисел.
+     * Находит максимальное значение
      *
-     * @param numbers массив с числами типа long, для которых нужно найти максимальное значение.
-     * @return OptionalLong, содержащий максимальное значение из массива, или пустой OptionalLong, если массив пуст.
+     * @param numbers List с числами типа long, для которых нужно найти максимальное значение.
+     * @return OptionalLong, содержащий максимальное значение из List, или пустой OptionalLong, если List пуст.
      */
-    private OptionalLong findMaxArray(long[] numbers) {
-        if (numbers.length == 0) return OptionalLong.empty();
+    private OptionalLong findMaxArray(List<Long> numbers) {
+        if (numbers.isEmpty()) return OptionalLong.empty();
 
-        long max = Long.MIN_VALUE;
-        for (long num : numbers) {
-            if (num > max) {
-                max = num;
-            }
-        }
-        return OptionalLong.of(max);
+        return OptionalLong.of(Collections.max(numbers));
     }
 }
